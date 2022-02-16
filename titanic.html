@@ -67,28 +67,33 @@
     <h1>CAP 4744/5745 - Interactive Data Visualization</h1>
     <h2>Project 2: Titanic Passenger List Dataset</h2>
     <h2>Sefat E Rahman</h2>
-    <h3>Visualization 1: Visualization Type</h3>
+    <h3>Visualization 1: Bar Chart</h3>
     <div><svg id="vis_1" name="vis_1" class="default_svg"></svg></div>
     <div>
-        <p></p>
+        <p>This bar chart represents the total number of survived people based on class. Where X axis represents the class and Y axis represent the total number of survived people </p>
     </div>
 
-    <h3>Visualization 2: Visualization Type</h3>
+    <h3>Visualization 2: Scatter Plot</h3>
     <div><svg id="vis_2" name="vis_2" class="default_svg"></svg></div>
     <div>
-        <p></p>
+        <p>This scatterplot plots the people over 30 years of age. Primarily there are two colors based on the survival status of the
+  		plotted pessengers. On mouse hover, one ring is added on each circle. The color of the ring is based on the embarked status. The radius of the circle
+		is changed based on the fare. The radius of the circle is higher if the fare is more than the minimum price. Due to the high volume of data, the entry
+		of the pessengers below age 30 is omitted.</p>
     </div>
 
-    <h3>Visualization 3: Visualization Type</h3>
+    <h3>Visualization 3: Stacked Bar Chart</h3>
     <div><svg id="vis_3" name="vis_3" class="default_svg"></svg></div>
     <div>
-        <p></p>
+        <p>This group bar chart gives the survival idea of the pessengers of each class. This bar chart also shows the 
+		status of gender wise survived status. Y axis represents total count and x axis represents the class.</p>
     </div>
 
-    <h3>Visualization 4: Visualization Type</h3>
+    <h3>Visualization 4: Pie Chart</h3>
     <div><svg id="vis_4" name="vis_4" class="default_svg"></svg></div>
     <div>
-        <p></p>
+        <p>This pie chart groups the number of people based on age. This pie chart answers how many young, middle aged and senior citizens were there
+		in Titanic.</p>
     </div>
 
 </div>
@@ -110,9 +115,9 @@
 	
 	$(document).ready(function(){
 		plot_barChart("#vis_1", titanic_data);
-		plot_groupedBarChart("#vis_2", titanic_data);
-		plot_pieChart("#vis_3", titanic_data);
-		plot_scatterplot("#vis_4", titanic_data);
+		plot_groupedBarChart("#vis_3", titanic_data);
+		plot_pieChart("#vis_4", titanic_data);
+		plot_scatterplot("#vis_2", titanic_data);
 	});
 </script>
 

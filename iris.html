@@ -70,7 +70,7 @@
     <h2>Sefat E Rahman</h2>
     <p id="test_p"></p>
 
-    <h3>Visualization 1: Visualization Type</h3>
+    <h3>Visualization 1: Bar Chart</h3>
 
     <div><svg id="vis_1" name="vis_1" class="default_svg"></svg></div>
 
@@ -81,19 +81,19 @@
         <p></p>
     </div>
 
-    <h3>Visualization 2: Visualization Type</h3>
+    <h3>Visualization 2: Scatterplots</h3>
     <div><svg id="vis_2" name="vis_2" class="default_svg"></svg></div>
     <div>
         <p></p>
     </div>
 
-    <h3>Visualization 3: Visualization Type</h3>
+    <h3>Visualization 3: Stacked Bar Chart</h3>
     <div><svg id="vis_3" name="vis_3" class="default_svg"></svg></div>
     <div>
         <p></p>
     </div>
 
-    <h3>Visualization 4: Visualization Type</h3>
+    <h3>Visualization 4: Pie Chart</h3>
     <div><svg id="vis_4" name="vis_4" class="default_svg"></svg></div>
     <div>
         <p></p>
@@ -114,10 +114,10 @@
     });
 
 	$(document).ready(function(){
-		plot_scatterplot("#vis_1", iris_data);
-		plot_pieChart("#vis_2", iris_data);
-		plot_barChart("#vis_3", iris_data);
-		plot_groupedBarChart("#vis_4", iris_data);
+		plot_scatterplot("#vis_2", iris_data);
+		plot_pieChart("#vis_4", iris_data);
+		plot_barChart("#vis_1", iris_data);
+		plot_groupedBarChart("#vis_3", iris_data);
 	});
 </script>
 
