@@ -99,14 +99,34 @@ function plot_scatterplot(svg_id, data){
 function plot_pieChart(svg_id, data){
 	data.then(data => {
 		var color = d3.scaleOrdinal()
-            .domain(["Iris-setosa", "Iris-versicolor", "Iris-virginica" ])
-            .range([ "#003f5c", "#bc5090", "#ffa600"])
+            .domain(["Iris-setosa_below_avg", "Iris-versicolor_below_avg", 
+			"Iris-virginica_below_avg", "Iris-setosa_above_avg", "Iris-versicolor_above_avg", "Iris-virginica_above_avg"])
+            .range([ "#003f5c", "#ff6e54", "#ffa600", "#dd5182", "#444e86", "#955196"])
 		
-		var cleanData = d3.nest()
-		.key(d => d.class)
-		.rollup(v => v.length)
-		.entries(data)
-		.filter(d => d.key !== "");
+		const formattedData = d3.group(data, d => d.class);
+		var cleanData = d3.map(formattedData, function(d){
+			const sepal_lengths = d3.map(d[1], d => parseFloat(d.sepal_length));
+			const sepal_length_avg = d3.sum(sepal_lengths) / sepal_lengths.length;
+			
+			return {
+				key: d[0] + "_below_avg",
+				value: sepal_lengths.filter(d => d < sepal_length_avg).length
+			};
+		});
+		
+		cleanData = cleanData.concat(d3.map(formattedData, function(d){
+			const sepal_lengths = d3.map(d[1], d => parseFloat(d.sepal_length));
+			const sepal_length_avg = d3.sum(sepal_lengths) / sepal_lengths.length;
+			
+			return {
+				key: d[0] + "_above_avg",
+				value: sepal_lengths.filter(d => d > sepal_length_avg).length
+			};
+		}));
+		
+		cleanData.filter(d => d.key !== "");
+		
+		console.log(cleanData);
 		
 		var angleData = d3.pie().sort(null).value(d => d.value)(cleanData);
 		
@@ -122,15 +142,19 @@ function plot_pieChart(svg_id, data){
 						.selectAll("path")
 						.data(angleData) 
 		
-		selections.enter()
-		.append("path")
-		.merge(selections)
+		const enterSelection = selections.enter()
+		.append("path");
+		
+		enterSelection.append("svg:title")
+		.text(function(d){return d.data.value;});
+		
+		enterSelection.merge(selections)
 		.attr("d", arcGen)
 		.attr("fill", d => color(d.data.key))
 		.attr("class", "pie");
 		
 		var legends = d3.select(svg_id).append("g")
-						.attr("transform", "translate(500, 300)")
+						.attr("transform", "translate(500, 200)")
 						.selectAll(".legends").data(angleData);
 						
 		var legend = legends.enter().append("g")
@@ -144,7 +168,10 @@ function plot_pieChart(svg_id, data){
 		
 		legend.append("text")
 		.classed("label", true)
-		.text(d => d.data.key)
+		.text(function(d){
+			const string = d.data.key.replaceAll('_',' '); 
+			return string.charAt(0).toUpperCase() + string.slice(1);
+		})
 		.attr("fill", d => color(d.data.key))
 		.attr("x", 30)
 		.attr("y", 15);
@@ -153,18 +180,20 @@ function plot_pieChart(svg_id, data){
 
 function plot_barChart(svg_id, data){
 	data.then(data => {
-		const yAxisText = "Sepal Length";
+		const yAxisText = "Sepal Length Average";
 		const formattedGroup = d3.group(data, d => d.class);
 		const formattedData = d3.map(formattedGroup, function(entry){
+			const sepal_lengths = d3.map(entry[1], v => parseFloat(v.sepal_length));
+			
 			return {
 				className: entry[0],
-				length: parseFloat(d3.format(".2f")(d3.sum(d3.map(entry[1], v => v.sepal_length))))
+				length_avg: d3.format(".2f")(d3.sum(sepal_lengths) / sepal_lengths.length)
 			};
-		}).filter(d => d.className !== "").sort((a, b) => d3.ascending(a.length, b.length));
+		}).filter(d => d.className !== "").sort((a, b) => d3.ascending(a.length_avg, b.length_avg));
 		
 		console.log(formattedData);
 		
-		const lengthData = d3.map(formattedData, d => d.length);
+		const lengthData = d3.map(formattedData, d => d.length_avg);
 		
 		const margin = {top: 30, bottom: 60, left: 30, right: 30};
 		const viewPortWidth = $(svg_id).width() 
@@ -186,7 +215,7 @@ function plot_barChart(svg_id, data){
 			.padding(0.5);
 
 		const yMin = 0;
-		const yMax = d3.max(lengthData) + 100;
+		const yMax = d3.max(lengthData) + 10;
 		
 		const yScale = d3.scaleLinear()
 			.domain([yMin, yMax])
@@ -200,13 +229,17 @@ function plot_barChart(svg_id, data){
 
 		plotSelections.exit().remove();
 
-		plotSelections.enter().append("rect")
-				.merge(plotSelections)
-				.attr("x", (d, i) => xScale(d.className))
-				.attr("y", d => yScale(d.length))
-				.attr("width", xScale.bandwidth())
-				.attr("height", d => yScale(yMin) - yScale(d.length))
-				.attr("class", "barRectangle");
+		const enterSelection = plotSelections.enter().append("rect");
+		
+		enterSelection.append("svg:title")
+		.text(function(d){return d.length_avg;});
+				
+		enterSelection.merge(plotSelections)
+		.attr("x", (d, i) => xScale(d.className))
+		.attr("y", d => yScale(d.length_avg))
+		.attr("width", xScale.bandwidth())
+		.attr("height", d => yScale(yMin) - yScale(d.length_avg))
+		.attr("class", "barRectangle");
 
 		const xAxis = d3.axisBottom().scale(xScale);
 		const yAxis = d3.axisLeft().scale(yScale);
@@ -234,25 +267,30 @@ function plot_barChart(svg_id, data){
 
 function plot_groupedBarChart(svg_id, data){
 	data.then(data => {
-		const yAxisText = "Length";
+		const yAxisText = "Length Average";
 		
 		const formattedGroup = d3.group(data, d => d.class);
 		const formattedData = d3.map(formattedGroup, function(entry){
+			const sepal_lengths = d3.map(entry[1], v => parseFloat(v.sepal_length));
+			const sepal_widths = d3.map(entry[1], v => parseFloat(v.sepal_width));
+			const petal_lengths = d3.map(entry[1], v => parseFloat(v.petal_length));
+			const petal_widths = d3.map(entry[1], v => parseFloat(v.petal_width));
+			
 			return {
-				sepal_length: parseFloat(d3.format(".2f")(d3.sum(d3.map(entry[1], v => v.sepal_length)))),
-				sepal_width: parseFloat(d3.format(".2f")(d3.sum(d3.map(entry[1], v => v.sepal_width)))),
-				petal_length: parseFloat(d3.format(".2f")(d3.sum(d3.map(entry[1], v => v.petal_length)))),
-				petal_width: parseFloat(d3.format(".2f")(d3.sum(d3.map(entry[1], v => v.petal_width)))),
+				sepal_length_avg: d3.format(".2f")(d3.sum(sepal_lengths) / sepal_lengths.length),
+				sepal_width_avg: d3.format(".2f")(d3.sum(sepal_widths) / sepal_widths.length),
+				petal_length_avg: d3.format(".2f")(d3.sum(petal_lengths) / petal_lengths.length),
+				petal_width_avg: d3.format(".2f")(d3.sum(petal_widths) / petal_widths.length),
 				class: entry[0]
 			};
 		}).filter(d => d.class !== "");
 		
-		//console.log(formattedData);
+		console.log(formattedData);
 		
-		const sp_lengths = d3.map(formattedData, d => d.sepal_length);
-		const sp_widths = d3.map(formattedData, d => d.sepal_width);
-		const p_lengths = d3.map(formattedData, d => d.petal_length);
-		const p_widths = d3.map(formattedData, d => d.petal_width);
+		const sp_length_avg = d3.map(formattedData, d => d.sepal_length_avg);
+		const sp_width_avg = d3.map(formattedData, d => d.sepal_width_avg);
+		const p_length_avg = d3.map(formattedData, d => d.petal_length_avg);
+		const p_width_avg = d3.map(formattedData, d => d.petal_width_avg);
 		
 		const subGroups = d3.keys(formattedData[0])
 		subGroups.pop();
@@ -290,7 +328,7 @@ function plot_groupedBarChart(svg_id, data){
 		.range(['#98a65d','#f8dfc1','#ea7f68','#de425b']);
 		
 		const yMin = 0;
-		const yMax = Math.max(d3.max(sp_lengths), d3.max(sp_widths), d3.max(p_lengths), d3.max(p_widths)) + 1;
+		const yMax = Math.max(d3.max(sp_length_avg), d3.max(sp_width_avg), d3.max(p_length_avg), d3.max(p_width_avg)) + 1;
 		
 		const yScale = d3.scaleLinear()
 		.domain([yMin, yMax])
@@ -319,7 +357,9 @@ function plot_groupedBarChart(svg_id, data){
 		.attr("y", d => yScale(d.value))
 		.attr("width", xScale.bandwidth())
 		.attr("height", d => yScale(yMin) - yScale(d.value))
-		.attr("fill", d => color(d.key));
+		.attr("fill", d => color(d.key))
+		.append("svg:title")
+		.text(d => d.value);
 		
 		const xAxis = d3.axisBottom().scale(xBandScale);
 		const yAxis = d3.axisLeft().scale(yScale);
@@ -371,7 +411,7 @@ function plot_groupedBarChart(svg_id, data){
 		.attr("dy",".35em")
 		.style("text-anchor","end")
 		.text(function(d) {
-			const string = d.replace('_',' '); 
+			const string = d.replaceAll('_',' '); 
 			return string.charAt(0).toUpperCase() + string.slice(1);
 		});
 	})

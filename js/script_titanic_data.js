@@ -212,9 +212,13 @@ function plot_pieChart(svg_id, data){
 						.selectAll("path")
 						.data(angleData) 
 		
-		selections.enter()
-		.append("path")
-		.merge(selections)
+		const enterSelection = selections.enter()
+		.append("path");
+		
+		enterSelection.append("svg:title")
+		.text(function(d){return d.data.value;});
+		
+		enterSelection.merge(selections)
 		.attr("d", arcGen)
 		.attr("fill", d => color(d.data.key))
 		.attr("class", "pie");
@@ -293,13 +297,17 @@ function plot_barChart(svg_id, data){
 
 		plotSelections.exit().remove();
 
-		plotSelections.enter().append("rect")
-				.merge(plotSelections)
-				.attr("x", (d, i) => xScale(d.passenger_class))
-				.attr("y", d => yScale(d.survived_count))
-				.attr("width", xScale.bandwidth())
-				.attr("height", d => yScale(yMin) - yScale(d.survived_count))
-				.attr("class", "barRectangle");
+		const enterSelection = plotSelections.enter().append("rect");
+		
+		enterSelection.append("svg:title")
+		.text(function(d){return d.survived_count;});
+				
+		enterSelection.merge(plotSelections)
+		.attr("x", (d, i) => xScale(d.passenger_class))
+		.attr("y", d => yScale(d.survived_count))
+		.attr("width", xScale.bandwidth())
+		.attr("height", d => yScale(yMin) - yScale(d.survived_count))
+		.attr("class", "barRectangle");
 
 		const xAxis = d3.axisBottom()
 		.scale(xScale)
@@ -418,7 +426,9 @@ function plot_groupedBarChart(svg_id, data){
 		.attr("y", d => yScale(d.value))
 		.attr("width", xScale.bandwidth())
 		.attr("height", d => yScale(yMin) - yScale(d.value))
-		.attr("fill", d => color(d.key));
+		.attr("fill", d => color(d.key))
+		.append("svg:title")
+		.text(d => d.value);
 		
 		const xAxis = d3.axisBottom()
 		.scale(xBandScale)
