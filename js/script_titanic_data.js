@@ -249,17 +249,19 @@ function plot_barChart(svg_id, data){
 	data.then(data => {
 		const yAxisText = "Count";
 		
+		//console.log(data);
 		const formattedGroup = d3.group(data, d => d.passenger_class);
 		//console.log(formattedGroup);
 		
 		const formattedData = d3.map(formattedGroup, function(entry){
+			//console.log(d3.map(entry[1], v => v.survived ));
 			return {
 				passenger_class: entry[0],
-				survived_count: parseInt(d3.map(entry[1], v => v.survived).filter(v => v == "Yes").length)
+				survived_count: parseInt(d3.map(entry[1],  v => v.survived).filter(v => v == "Yes").length)
 			};
 		}).filter(d => d.passenger_class !== "");
-		
-		//console.log(formattedData);
+		//map function returns an array where every element is some modified form of the same element in the data array.
+		console.log(formattedData);
 		
 		const survivedCountData = d3.map(formattedData, d => d.survived_count);
 		
@@ -270,12 +272,7 @@ function plot_barChart(svg_id, data){
 		const width = viewPortWidth - (margin.left + margin.right);
 		const height = viewPortHeight - (margin.top + margin.bottom);
 
-		const canvas = d3.select(svg_id)
-		.append("svg")
-		.attr("x", 0)
-		.attr("y", 0)
-		.attr("width", viewPortWidth)
-		.attr("height", viewPortHeight);
+		const canvas = d3.select(svg_id);
 
 		const xScale = d3.scaleBand()
 			.domain(formattedData.map(d => d.passenger_class))
@@ -287,11 +284,11 @@ function plot_barChart(svg_id, data){
 		
 		const yScale = d3.scaleLinear()
 			.domain([yMin, yMax])
-			.range([height + margin.top, margin.top])
+			.range([height+margin.top, margin.top])
 			.nice();
 	
+
 		const plotSelections = canvas.append("g")
-							.attr("fill", "#003f5c")
 							.selectAll("rect")
 							.data(formattedData);
 
@@ -300,18 +297,25 @@ function plot_barChart(svg_id, data){
 		const enterSelection = plotSelections.enter().append("rect");
 		
 		enterSelection.append("svg:title")
-		.text(function(d){return d.survived_count;});
+		.text(function(d){return "Total People Survived: " + d.survived_count;});
 				
 		enterSelection.merge(plotSelections)
+		.attr("class", "bar_rectangle")
+		.on("mouseover", onMouseOver)
+		.on("mouseout", onMouseOut)
 		.attr("x", (d, i) => xScale(d.passenger_class))
 		.attr("y", d => yScale(d.survived_count))
 		.attr("width", xScale.bandwidth())
-		.attr("height", d => yScale(yMin) - yScale(d.survived_count))
-		.attr("class", "barRectangle");
+		.transition()
+		.ease(d3.easeLinear)
+		.duration(500)
+		.delay(function(d, i){ return i * 50; })
+		.attr("height", d => yScale(yMin) - yScale(d.survived_count));
 
 		const xAxis = d3.axisBottom()
 		.scale(xScale)
 		.tickFormat(v => "Class " + v );
+		
 		const yAxis = d3.axisLeft().scale(yScale);
 
 		canvas.append("g")
@@ -332,6 +336,29 @@ function plot_barChart(svg_id, data){
 			.style("font-size", "12px")
 			.style("font-family", "sans-serif")
 			.style("text-anchor", "end");
+			
+		function onMouseOver(d, i) {
+			d3.select(this)
+			.attr("class", "bar_rectangle_highlight");
+			
+			d3.select(this)
+			.transition()
+			.duration(500)
+			.attr("width", xScale.bandwidth() + 5)
+			.attr("y", d => yScale(d.survived_count) - 20)
+			.attr("height", d => yScale(yMin) - yScale(d.survived_count) + 20);
+		}
+		
+		function onMouseOut(d, i) {
+			d3.select(this).attr("class", "bar_rectangle");
+			
+			d3.select(this)
+			.transition()
+			.duration(500)
+			.attr("width", xScale.bandwidth())
+			.attr("y", d => yScale(d.survived_count))
+			.attr("height", d => yScale(yMin) - yScale(d.survived_count));
+		}
 	})
 }
 
