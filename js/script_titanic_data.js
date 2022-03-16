@@ -449,13 +449,46 @@ function plot_groupedBarChart(svg_id, data){
 			});
 		})
 		.join("rect")
+		.attr("class", "group_bar_rectangle")
+		.on("mouseover", onMouseOver)
+		.on("mouseout", onMouseOut)
 		.attr("x", d => xScale(d.key))
 		.attr("y", d => yScale(d.value))
 		.attr("width", xScale.bandwidth())
 		.attr("height", d => yScale(yMin) - yScale(d.value))
 		.attr("fill", d => color(d.key))
 		.append("svg:title")
-		.text(d => d.value);
+		.text(d => "Count: " + d.value);
+		
+		function onMouseOver(d, i) {
+			const heightIncrease = 20;
+			const widthIncrease = 4;
+			
+			d3.selectAll(".group_bar_rectangle")
+			.attr("class", "group_bar_rectangle_non_highlight");
+			
+			d3.select(this)
+			.attr("class", "group_bar_rectangle")
+			.transition()
+			.duration(500)
+			.attr("x", d => xScale(d.key) - (widthIncrease / 2))
+			.attr("y", d => yScale(d.value) - heightIncrease)
+			.attr("width", xScale.bandwidth() + widthIncrease)
+			.attr("height", d => yScale(yMin) - yScale(d.value) + heightIncrease);
+		}
+		
+		function onMouseOut(d, i) {
+			d3.selectAll(".group_bar_rectangle_non_highlight")
+			.attr("class", "group_bar_rectangle");
+			
+			d3.select(this)
+			.transition()
+			.duration(500)
+			.attr("x", d => xScale(d.key))
+			.attr("y", d => yScale(d.value))
+			.attr("width", xScale.bandwidth())
+			.attr("height", d => yScale(yMin) - yScale(d.value));
+		}
 		
 		const xAxis = d3.axisBottom()
 		.scale(xBandScale)
