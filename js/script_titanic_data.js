@@ -185,7 +185,7 @@ function plot_pieChart(svg_id, data){
 		const above_sixty = parseInt(data.filter(d => d.age > 60).length);
 		
 		console.log(below_thirty + thirty_to_sixty + above_sixty);
-		
+		//change
 		const cleanData = [
 			{ key: "Below Thirty", value: below_thirty},
 			{ key: "Thirty to Sixty", value: thirty_to_sixty},
@@ -196,15 +196,22 @@ function plot_pieChart(svg_id, data){
 		
 		var color = d3.scaleOrdinal()
             .domain(["Below Thirty", "Thirty to Sixty", "Above Sixty" ])
-            .range([ "#003f5c", "#bc5090", "#ffa600"])
+            .range([ "#67b7dc", "#6771dc", "#dc6788"])
 		
 		var angleData = d3.pie().sort(null).value(d => d.value)(cleanData);
 		
 		console.log(angleData);
 		
+		const arcInnerRadius = 00;
+		const arcOuterRadius = 200;
+		
 		var arcGen = d3.arc()
-					.innerRadius(0)
-					.outerRadius(200);
+					.innerRadius(arcInnerRadius)
+					.outerRadius(arcOuterRadius);
+					
+		const arcGenHover = d3.arc()
+					.innerRadius(arcInnerRadius)
+					.outerRadius(arcOuterRadius + 15);
 		
 		const selections = d3.select(svg_id)
 						.append("g")
@@ -219,13 +226,28 @@ function plot_pieChart(svg_id, data){
 		.text(function(d){return d.data.value;});
 		
 		enterSelection.merge(selections)
+		.on("mouseover", onMouseOver)
+		.on("mouseout", onMouseOut)
 		.attr("d", arcGen)
 		.attr("fill", d => color(d.data.key))
 		.attr("class", "pie");
 		
 		
 		function onMouseOver(d, i) {
-			
+			d3.select(this)
+			.attr("stroke", "gray")
+			.transition()
+			.duration(200)
+			.attr("d", arcGenHover)
+			.attr("stroke-width", 1);
+		}
+		
+		function onMouseOut(d, i) {
+			d3.select(this)
+			.transition()
+			.duration(200)
+			.attr("d", arcGen)
+			.attr("stroke", "none");
 		}
 		
 		var legends = d3.select(svg_id).append("g")
