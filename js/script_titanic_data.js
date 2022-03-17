@@ -223,6 +223,11 @@ function plot_pieChart(svg_id, data){
 		.attr("fill", d => color(d.data.key))
 		.attr("class", "pie");
 		
+		
+		function onMouseOver(d, i) {
+			
+		}
+		
 		var legends = d3.select(svg_id).append("g")
 						.attr("transform", "translate(500, 300)")
 						.selectAll(".legends").data(angleData);
@@ -245,9 +250,10 @@ function plot_pieChart(svg_id, data){
 	})
 }
 
-function plot_barChart(svg_id, data){
+function plot_barChart(svg_id, data, shouldCountSurviver){
 	data.then(data => {
 		const yAxisText = "Count";
+		const flag = shouldCountSurviver ? "Yes" : "No"
 		
 		//console.log(data);
 		const formattedGroup = d3.group(data, d => d.passenger_class);
@@ -257,7 +263,7 @@ function plot_barChart(svg_id, data){
 			//console.log(d3.map(entry[1], v => v.survived ));
 			return {
 				passenger_class: entry[0],
-				survived_count: parseInt(d3.map(entry[1],  v => v.survived).filter(v => v == "Yes").length)
+				survived_count: parseInt(d3.map(entry[1],  v => v.survived).filter(v => v == flag).length)
 			};
 		}).filter(d => d.passenger_class !== "");
 		//map function returns an array where every element is some modified form of the same element in the data array.
@@ -338,15 +344,19 @@ function plot_barChart(svg_id, data){
 			.style("text-anchor", "end");
 			
 		function onMouseOver(d, i) {
+			const widthIncrease = 4;
+			const heightIncrease = 20;
+			
 			d3.select(this)
 			.attr("class", "bar_rectangle_highlight");
 			
 			d3.select(this)
 			.transition()
 			.duration(500)
-			.attr("width", xScale.bandwidth() + 5)
-			.attr("y", d => yScale(d.survived_count) - 20)
-			.attr("height", d => yScale(yMin) - yScale(d.survived_count) + 20);
+			.attr("x", d => xScale(d.passenger_class) - (widthIncrease / 2))
+			.attr("y", d => yScale(d.survived_count) - heightIncrease)
+			.attr("width", xScale.bandwidth() + widthIncrease)
+			.attr("height", d => yScale(yMin) - yScale(d.survived_count) + heightIncrease);
 		}
 		
 		function onMouseOut(d, i) {
