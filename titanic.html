@@ -80,6 +80,11 @@
     <h2>Project 2: Titanic Passenger List Dataset</h2>
     <h2>Sefat E Rahman</h2>
     <h3>Visualization 1: Bar Chart</h3>
+	<label for="bar_count_type">Choose count type:</label>
+	<select name="bar_count_type" id="bar_count_type" onchange="barChartCountListener(this.value);">
+	<option value="surviver_count">Surviver</option>
+	<option value="death_count">Death</option>
+	</select>
     <div><svg id="vis_1" name="vis_1" class="default_svg"></svg></div>
     <div>
         <p>This bar chart represents the total number of survived people based on class. To answer the question, how many people survived from each class, bar chart is the best choice.
@@ -127,11 +132,16 @@ On mouse hover the exact number is shown.		</p>
         };
     });
 	
+	function barChartCountListener(d) {
+		plot_barChart("#vis_1", titanic_data, d == "surviver_count");
+	}
+	
 	$(document).ready(function(){
 		plot_barChart("#vis_1", titanic_data, true);
 		plot_groupedBarChart("#vis_3", titanic_data);
 		plot_pieChart("#vis_4", titanic_data);
 		plot_scatterplot("#vis_2", titanic_data);
+		
 	});
 </script>
 

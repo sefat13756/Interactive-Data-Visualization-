@@ -276,6 +276,7 @@ function plot_barChart(svg_id, data, shouldCountSurviver){
 	data.then(data => {
 		const yAxisText = "Count";
 		const flag = shouldCountSurviver ? "Yes" : "No"
+		const formattedTextPrefix = shouldCountSurviver ? "Total People Survived: " : "Total People Died: "
 		
 		//console.log(data);
 		const formattedGroup = d3.group(data, d => d.passenger_class);
@@ -301,6 +302,8 @@ function plot_barChart(svg_id, data, shouldCountSurviver){
 		const height = viewPortHeight - (margin.top + margin.bottom);
 
 		const canvas = d3.select(svg_id);
+		
+		canvas.selectAll("g").remove();
 
 		const xScale = d3.scaleBand()
 			.domain(formattedData.map(d => d.passenger_class))
@@ -325,7 +328,7 @@ function plot_barChart(svg_id, data, shouldCountSurviver){
 		const enterSelection = plotSelections.enter().append("rect");
 		
 		enterSelection.append("svg:title")
-		.text(function(d){return "Total People Survived: " + d.survived_count;});
+		.text(function(d){return formattedTextPrefix + d.survived_count;});
 				
 		enterSelection.merge(plotSelections)
 		.attr("class", "bar_rectangle")
