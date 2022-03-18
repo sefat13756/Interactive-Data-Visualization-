@@ -26,7 +26,23 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
-
+    
+	<script src="js/script_calvin_data.js"></script>
+	<script src="https://d3js.org/d3-collection.v1.min.js"></script>
+	<script src="https://d3js.org/d3-array.v2.min.js"></script>
+	
+	<style>		
+		.bar_rectangle {
+			fill : #5452a3;
+		}
+		
+		.bar_rectangle_highlight {
+			fill : #8ca252;
+		}
+		.pie:hover{
+			opacity: 0.66
+		}
+	</style>
 
     <title>CAP 4744/5745 - Interactive Data Visualization - Project 2</title>
 
@@ -55,6 +71,13 @@
     <h2>Sefat E Rahman</h2>
 
     <h3>Visualization 1: Visualization Type</h3>
+	<label for="bar_count_type">Choose type:</label>
+	<select name="bar_count_type" id="bar_count_type" onchange="histogramTypeListener(this.value);">
+	<option value="SATM">SATM</option>
+	<option value="SATV">SATV</option>
+	<option value="ACT">ACT</option>
+	<option value="GPA">GPA</option>
+	</select>
     <div><svg id="vis_1" name="vis_1" class="default_svg"></svg></div>
     <div>
         <p>Brief description of what the visualization is trying to show about the data.</p>
@@ -85,10 +108,32 @@
 </div>
 
 
-<script>
 
-    /*** START CODE HERE ***/
+<script type="text/javascript">
 
+    const calvin_data = d3.csv("data/srsatact.csv", (row, i) => {
+        return {
+            SATM: +row.SATM,
+            SATV: +row.SATV,
+            ACT: +row.ACT,
+            GPA: +row.GPA
+        };
+    });
+    console.log(calvin_data);
+	
+	function histogramTypeListener(col_name){
+		calvin_data.then(array_data => {
+			plot_histogram("#vis_1", array_data, col_name); 
+		})  
+	}
+   
+   $(document).ready(function(){
+        calvin_data.then(array_data => {
+			plot_histogram("#vis_1", array_data, "SATM"); 
+			plot_pieChart("#vis_4", array_data);
+			
+		})
+   });
 </script>
 
 </body>
