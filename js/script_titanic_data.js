@@ -390,8 +390,9 @@ function plot_barChart(svg_id, data, shouldCountSurviver){
 			d3.select(this)
 			.transition()
 			.duration(500)
-			.attr("width", xScale.bandwidth())
+			.attr("x", d => xScale(d.passenger_class))
 			.attr("y", d => yScale(d.survived_count))
+			.attr("width", xScale.bandwidth())
 			.attr("height", d => yScale(yMin) - yScale(d.survived_count));
 		}
 	})

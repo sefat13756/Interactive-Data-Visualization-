@@ -71,8 +71,8 @@
     <h2>Sefat E Rahman</h2>
 
     <h3>Visualization 1: Visualization Type</h3>
-	<label for="bar_count_type">Choose type:</label>
-	<select name="bar_count_type" id="bar_count_type" onchange="histogramTypeListener(this.value);">
+	<label for="histogram_type">Choose type:</label>
+	<select name="histogram_type" id="histogram_type" onchange="histogramTypeListener(this.value);">
 	<option value="SATM">SATM</option>
 	<option value="SATV">SATV</option>
 	<option value="ACT">ACT</option>
@@ -92,6 +92,23 @@
     </div>
 
     <h3>Visualization 3: Visualization Type</h3>
+	
+	<label for="scatter_x_axis_type">Choose X axis type:</label>
+	<select name="scatter_x_axis_type" id="scatter_x_axis_type" onchange="scatterTypeListener();">
+	<option value="SATM">SATM</option>
+	<option value="SATV">SATV</option>
+	<option value="ACT">ACT</option>
+	<option value="GPA">GPA</option>
+	</select>
+	
+	<label for="scatter_y_axis_type">Choose Y axis type:</label>
+	<select name="scatter_y_axis_type" id="scatter_y_axis_type" onchange="scatterTypeListener();">
+	<option value="SATM">SATM</option>
+	<option value="SATV" selected>SATV</option>
+	<option value="ACT">ACT</option>
+	<option value="GPA">GPA</option>
+	</select>
+	
     <div><svg id="vis_3" name="vis_3" class="default_svg"></svg></div>
     <div>
         <p>Brief description of what the visualization is trying to show about the data.</p>
@@ -126,12 +143,20 @@
 			plot_histogram("#vis_1", array_data, col_name); 
 		})  
 	}
+	
+	function scatterTypeListener() {
+		calvin_data.then(array_data => {
+			const col1_name = d3.select("#scatter_x_axis_type").node().value; 
+			const col2_name = d3.select("#scatter_y_axis_type").node().value; 
+			plot_scatter("#vis_3", array_data, col1_name, col2_name); 
+		})
+	}
    
    $(document).ready(function(){
         calvin_data.then(array_data => {
-			plot_histogram("#vis_1", array_data, "SATM"); 
-			plot_pieChart("#vis_4", array_data);
-			
+			plot_histogram("#vis_1", array_data, d3.select("#histogram_type").node().value); 
+			plot_pieChart("#vis_2", array_data);
+			plot_scatter("#vis_3", array_data, d3.select("#scatter_x_axis_type").node().value, d3.select("#scatter_y_axis_type").node().value);
 		})
    });
 </script>

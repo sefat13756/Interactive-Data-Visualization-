@@ -3,95 +3,93 @@ function plot_pieChart(svg_id, data){
 	const below_three = parseInt(data.filter(d => d.GPA < 3.00).length);
 	const three_to_threePointFive = parseInt(data.filter(d => d.GPA >= 3.0 && d.GPA <= 3.5).length);
 	const above_threePointFive = parseInt(data.filter(d => d.GPA > 3.5).length);
-		
+	
 	console.log(below_three + three_to_threePointFive + above_threePointFive);
-		//change
+	//change
 	const cleanData = [
 		{ key: "GPA below 3", value: below_three},
 		{ key: "GPA between 3 and 3.5", value: three_to_threePointFive},
 		{ key: "GPA above 3.5", value: above_threePointFive}
 	];
-		
+	
 	console.log(cleanData);
-		
+	
 	var color = d3.scaleOrdinal()
-            .domain(["GPA below 3", "GPA between 3 and 3.5", "GPA above 3.5" ])
-            .range([ "#67b7dc", "#6771dc", "#dc6788"])
-		
+	.domain(["GPA below 3", "GPA between 3 and 3.5", "GPA above 3.5" ])
+	.range([ "#67b7dc", "#6771dc", "#dc6788"])
+	
 	var angleData = d3.pie().sort(null).value(d => d.value)(cleanData);
-		
+	
 	console.log(angleData);
-		
+	
 	const arcInnerRadius = 00;
 	const arcOuterRadius = 200;
-		
+	
 	var arcGen = d3.arc()
-					.innerRadius(arcInnerRadius)
-					.outerRadius(arcOuterRadius);
-					
+	.innerRadius(arcInnerRadius)
+	.outerRadius(arcOuterRadius);
+	
 	const arcGenHover = d3.arc()
-					.innerRadius(arcInnerRadius)
-					.outerRadius(arcOuterRadius + 15);
-		
+	.innerRadius(arcInnerRadius)
+	.outerRadius(arcOuterRadius + 15);
+	
 	const selections = d3.select(svg_id)
-						.append("g")
-						.attr("transform", "translate(250, 250)")
-						.selectAll("path")
-						.data(angleData) 
-		
+	.append("g")
+	.attr("transform", "translate(250, 250)")
+	.selectAll("path")
+	.data(angleData) 
+	
 	const enterSelection = selections.enter()
-		.append("path");
-		
+	.append("path");
+	
 	enterSelection.append("svg:title")
-		.text(function(d){return d.data.value;});
-		
+	.text(function(d){return d.data.value;});
+	
 	enterSelection.merge(selections)
-		.on("mouseover", onMouseOver)
-		.on("mouseout", onMouseOut)
-		.attr("d", arcGen)
-		.attr("fill", d => color(d.data.key))
-		.attr("class", "pie");
-		
-		
+	.on("mouseover", onMouseOver)
+	.on("mouseout", onMouseOut)
+	.attr("d", arcGen)
+	.attr("fill", d => color(d.data.key))
+	.attr("class", "pie");
+	
+	
 	function onMouseOver(d, i) {
 		d3.select(this)
-			.attr("stroke", "gray")
-			.transition()
-			.duration(200)
-			.attr("d", arcGenHover)
-			.attr("stroke-width", 1);
+		.attr("stroke", "gray")
+		.transition()
+		.duration(200)
+		.attr("d", arcGenHover)
+		.attr("stroke-width", 1);
 	}
-		
+	
 	function onMouseOut(d, i) {
 		d3.select(this)
-			.transition()
-			.duration(200)
-			.attr("d", arcGen)
-			.attr("stroke", "none");
+		.transition()
+		.duration(200)
+		.attr("d", arcGen)
+		.attr("stroke", "none");
 	}
-		
+	
 	var legends = d3.select(svg_id).append("g")
-						.attr("transform", "translate(500, 300)")
-						.selectAll(".legends").data(angleData);
-						
+	.attr("transform", "translate(500, 300)")
+	.selectAll(".legends").data(angleData);
+	
 	var legend = legends.enter().append("g")
-		.classed("legends", " ")
-		.attr("transform", function(d,i){ return "translate(0, "+ (i+1)*30 +")"; });
-		
+	.classed("legends", " ")
+	.attr("transform", function(d,i){ return "translate(0, "+ (i+1)*30 +")"; });
+	
 	legend.append("rect")
-		.attr("width", 20)
-		.attr("height", 20)
-		.attr("fill", d => color(d.data.key))
-		
+	.attr("width", 20)
+	.attr("height", 20)
+	.attr("fill", d => color(d.data.key))
+	
 	legend.append("text")
-		.classed("label", true)
-		.text(d => d.data.key)
-		.attr("fill", d => color(d.data.key))
-		.attr("x", 30)
-		.attr("y", 15);
+	.classed("label", true)
+	.text(d => d.data.key)
+	.attr("fill", d => color(d.data.key))
+	.attr("x", 30)
+	.attr("y", 15);
 }
-
-
 
 function plot_histogram(svg_id, data, col_name){
 	const yAxisText = "Count";
@@ -100,12 +98,12 @@ function plot_histogram(svg_id, data, col_name){
 	const margin = {top: 30, bottom: 60, left: 30, right: 30};
 	const viewPortWidth = $(svg_id).width() 
 	const viewPortHeight = $(svg_id).height()
-		
+	
 	const width = viewPortWidth - (margin.left + margin.right);
 	const height = viewPortHeight - (margin.top + margin.bottom);
-
+	
 	const canvas = d3.select(svg_id);
-		
+	
 	canvas.selectAll("g").remove();
 	
 	const formatted_data = d3.map(data, function(d){
@@ -116,62 +114,62 @@ function plot_histogram(svg_id, data, col_name){
 	const xMax = d3.max(formatted_data);
 	
 	const xScale = d3.scaleLinear()
-	                 .domain([xMin, xMax])
-					 .range([margin.left, width + margin.left]);
-					 
+	.domain([xMin, xMax])
+	.range([margin.left, width + margin.left]);
+	
 	const histogram = d3.histogram()
-                .value(d => d)   
-                .domain(xScale.domain()) 
-                .thresholds(xScale.ticks(70));	
-
+	.value(d => d)   
+	.domain(xScale.domain()) 
+	.thresholds(xScale.ticks(70));	
+	
 	const bins = histogram(formatted_data);
-
+	
     console.log(bins);
 	
 	const yMin =  0;
 	const yMax = d3.max(d3.map(bins, d => d.length));
 	
 	const yScale = d3.scaleLinear()
-	                 .domain([yMin, yMax])
-					 .range([height + margin.top, margin.top])
-					 .nice();
-					 
-					 
+	.domain([yMin, yMax])
+	.range([height + margin.top, margin.top])
+	.nice();
+	
+	
 	const plotSelections = canvas.append("g")
-							.selectAll("rect")
-							.data(bins);
-
+	.selectAll("rect")
+	.data(bins);
+	
 	plotSelections.exit().remove();
-
+	
 	const enterSelection = plotSelections.enter().append("rect");
-		
+	
 	enterSelection.append("svg:title")
-		.text(function(d){return formattedTextPrefix + d.length;});
-				
+	.text(function(d){return formattedTextPrefix + d.length;});
+	
 	enterSelection.merge(plotSelections)
-		.attr("class", "bar_rectangle")
-		.on("mouseover", onMouseOver)
-		.on("mouseout", onMouseOut)
-		.attr("x", d => xScale(d.x0))
-		.attr("y", d => yScale(d.length))
-		.attr("width", d => xScale(d.x1) - xScale(d.x0))
-		.transition()
-		.ease(d3.easeExp)
-		.delay(function(d, i){ return i * 20; })
-		.duration(500)
-		.attr("height", d => yScale(yMin) - yScale(d.length));
-
+	.attr("class", "bar_rectangle")
+	.on("mouseover", onMouseOver)
+	.on("mouseout", onMouseOut)
+	.attr("x", d => xScale(d.x0))
+	.attr("y", d => yScale(d.length))
+	.attr("width", d => xScale(d.x1) - xScale(d.x0))
+	.transition()
+	.ease(d3.easeExp)
+	.delay(function(d, i){ return i * 20; })
+	.duration(500)
+	.attr("height", d => yScale(yMin) - yScale(d.length));
+	
 	const xAxis = d3.axisBottom()
-		.scale(xScale);
-		
+	.scale(xScale);
+	
 	const yAxis = d3.axisLeft().scale(yScale);
-
+	
 	canvas.append("g")
-			.attr("transform", "translate(0, "+ (height + margin.top) +")")
-			.transition()
-			.duration(1000)
-			.call(xAxis)
-			.attr("font-size", "12px");
+	.attr("transform", "translate(0, "+ (height + margin.top) +")")
+	.transition()
+	.duration(1000)
+	.call(xAxis)
+	.attr("font-size", "12px");
 	
 	canvas.append("g")
 	.append("text")
@@ -183,13 +181,13 @@ function plot_histogram(svg_id, data, col_name){
 	.style("font-size", "12px")
 	.style("font-family", "sans-serif")
 	.style("text-anchor", "end");
-
+	
 	canvas.append("g")
 	.attr("transform", "translate("+ margin.left +", 0)")
-			.transition()
-			.duration(1000)
-			.call(yAxis);
-			
+	.transition()
+	.duration(1000)
+	.call(yAxis);
+	
 	canvas.append("g")
 	.append("text")
     .attr("text-anchor", "end")
@@ -201,32 +199,144 @@ function plot_histogram(svg_id, data, col_name){
 	.style("font-size", "12px")
 	.style("font-family", "sans-serif")
 	.style("text-anchor", "end");
-			
+	
 	function onMouseOver(d, i) {
 		const widthIncrease = 4;
 		const heightIncrease = 20;
-			
-		d3.select(this)
-			.attr("class", "bar_rectangle_highlight");
-			
-		d3.select(this)
-			.transition()
-			.duration(500)
-			.attr("x", d => xScale(d.x0) - (widthIncrease / 2))
-			.attr("y", d => yScale(d.length) - heightIncrease)
-			.attr("width", d => xScale(d.x1) - xScale(d.x0) + widthIncrease)
-			.attr("height", d => yScale(yMin) - yScale(d.length) + heightIncrease);
-	}
 		
+		d3.select(this)
+		.attr("class", "bar_rectangle_highlight");
+		
+		d3.select(this)
+		.transition()
+		.duration(500)
+		.attr("x", d => xScale(d.x0) - (widthIncrease / 2))
+		.attr("y", d => yScale(d.length) - heightIncrease)
+		.attr("width", d => xScale(d.x1) - xScale(d.x0) + widthIncrease)
+		.attr("height", d => yScale(yMin) - yScale(d.length) + heightIncrease);
+	}
+	
 	function onMouseOut(d, i) {
 		d3.select(this).attr("class", "bar_rectangle");
-			
+		
 		d3.select(this)
-			.transition()
-			.duration(500)
-			.attr("x", d => xScale(d.x0))
-			.attr("y", d => yScale(d.length))
-			.attr("width", d => xScale(d.x1) - xScale(d.x0))
-			.attr("height", d => yScale(yMin) - yScale(d.length));
+		.transition()
+		.duration(500)
+		.attr("x", d => xScale(d.x0))
+		.attr("y", d => yScale(d.length))
+		.attr("width", d => xScale(d.x1) - xScale(d.x0))
+		.attr("height", d => yScale(yMin) - yScale(d.length));
 	}
+}
+
+function plot_scatter(svg_id, data, col1_name, col2_name) {
+	const margin = {top: 60, bottom: 60, left: 60, right: 60};
+	const viewPortWidth = $(svg_id).width() 
+	const viewPortHeight = $(svg_id).height()
+	
+	const width = viewPortWidth - (margin.left + margin.right);
+	const height = viewPortHeight - (margin.top + margin.bottom);
+	
+	const canvas = d3.select(svg_id);
+	
+	canvas.selectAll("g").remove();
+	
+	const xMin = 0;
+	const _xMax = d3.max(data, d => d[col1_name])
+	const xMax = _xMax;
+	
+	const xScale = d3.scaleLinear()
+	.domain([xMin, xMax])
+	.range([margin.left, width + margin.left]);
+	
+	const color = d3.scaleOrdinal()
+		.domain([xMin, xMax])
+		.range(d3.schemeDark2);
+	
+	const yMin = 0;
+	const _yMax = d3.max(data, d => d[col2_name]);
+	const yMax = _yMax;
+	
+	const yScale = d3.scaleLinear()
+	.domain([yMin, yMax])
+	.range([margin.top + height, margin.top]);
+	
+	const radius = 5;
+	
+	const selections = canvas.append("g")
+	.selectAll("circle")
+	.data(data);
+	
+	selections.exit().remove();
+	
+	const enterSelection = selections.enter().append("circle");
+	
+	enterSelection.append("svg:title")
+	.text(d => col1_name + ": " + d[col1_name] + "\n" + col2_name + ": " + d[col2_name]);
+	
+	enterSelection.merge(selections)
+	.on("mouseover", onMouseOver)
+	.on("mouseout", onMouseOut)
+	.attr("cx", viewPortWidth / 2)
+	.attr("cy", viewPortHeight / 2)
+	.transition()
+	.ease(d3.easeLinear)
+	.delay((d, i) => i * 2)
+	.duration(100)
+	.attr("cx", (d, i) => xScale(d[col1_name]))
+	.attr("cy", d => yScale(d[col2_name]))
+	.attr("r", radius)
+	.attr("fill", d => color(d[col1_name]))
+	.attr("stroke", "#f8dfc1")
+	.attr("stroke-width", "1px");
+	
+	function onMouseOver(d, i) {
+		d3.select(this)
+			.attr("stroke-width", "5px")
+			.attr("r", radius * 2);
+	}
+	
+	function onMouseOut(d, i) {
+		d3.select(this)
+			.attr("stroke-width", "1px")
+			.attr("r", radius);
+	}
+	
+	const xAxis = d3.axisBottom().scale(xScale);
+	const yAxis = d3.axisLeft().scale(yScale);
+	
+	canvas.append("g")
+	.attr("transform", `translate(0, ${height + margin.top + 10})`)
+	.transition()
+	.duration(1000)
+	.call(xAxis);
+	
+	canvas.append("g")
+	.append("text")
+    .attr("text-anchor", "end")
+	.attr("x", width + margin.left - 20)
+    .attr("y", height + margin.top + 40)
+    .text(col1_name)
+	.style('fill', 'black')
+	.style("font-size", "12px")
+	.style("font-family", "sans-serif")
+	.style("text-anchor", "end");
+
+	canvas.append("g")
+	.attr("transform", `translate(${margin.left - 10}, 0)`)
+	.transition()
+	.duration(1000)
+	.call(yAxis);
+	
+	canvas.append("g")
+	.append("text")
+    .attr("text-anchor", "end")
+	.attr("transform", "rotate(-90)")
+	.attr("x", margin.top - 100)
+    .attr("y", margin.left + 20)
+    .text(col2_name)
+	.style('fill', 'black')
+	.style("font-size", "12px")
+	.style("font-family", "sans-serif")
+	.style("text-anchor", "end");
 }
