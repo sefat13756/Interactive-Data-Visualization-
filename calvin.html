@@ -39,6 +39,12 @@
 		.bar_rectangle_highlight {
 			fill : #8ca252;
 		}
+		.group_bar_rectangle {
+			opacity: 1.0;
+		}
+		.group_bar_rectangle_non_highlight {
+			opacity: 0.2;
+		}
 		.pie:hover{
 			opacity: 0.66
 		}
@@ -157,6 +163,7 @@
 			plot_histogram("#vis_1", array_data, d3.select("#histogram_type").node().value); 
 			plot_pieChart("#vis_2", array_data);
 			plot_scatter("#vis_3", array_data, d3.select("#scatter_x_axis_type").node().value, d3.select("#scatter_y_axis_type").node().value);
+			plot_groupedBarChart("#vis_4", array_data);
 		})
    });
 </script>

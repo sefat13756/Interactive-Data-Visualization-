@@ -250,8 +250,8 @@ function plot_scatter(svg_id, data, col1_name, col2_name) {
 	.range([margin.left, width + margin.left]);
 	
 	const color = d3.scaleOrdinal()
-		.domain([xMin, xMax])
-		.range(d3.schemeDark2);
+	.domain([xMin, xMax])
+	.range(d3.schemeDark2);
 	
 	const yMin = 0;
 	const _yMax = d3.max(data, d => d[col2_name]);
@@ -292,14 +292,14 @@ function plot_scatter(svg_id, data, col1_name, col2_name) {
 	
 	function onMouseOver(d, i) {
 		d3.select(this)
-			.attr("stroke-width", "5px")
-			.attr("r", radius * 2);
+		.attr("stroke-width", "5px")
+		.attr("r", radius * 2);
 	}
 	
 	function onMouseOut(d, i) {
 		d3.select(this)
-			.attr("stroke-width", "1px")
-			.attr("r", radius);
+		.attr("stroke-width", "1px")
+		.attr("r", radius);
 	}
 	
 	const xAxis = d3.axisBottom().scale(xScale);
@@ -321,7 +321,7 @@ function plot_scatter(svg_id, data, col1_name, col2_name) {
 	.style("font-size", "12px")
 	.style("font-family", "sans-serif")
 	.style("text-anchor", "end");
-
+	
 	canvas.append("g")
 	.attr("transform", `translate(${margin.left - 10}, 0)`)
 	.transition()
@@ -339,4 +339,199 @@ function plot_scatter(svg_id, data, col1_name, col2_name) {
 	.style("font-size", "12px")
 	.style("font-family", "sans-serif")
 	.style("text-anchor", "end");
+}
+
+function plot_groupedBarChart(svg_id, data){
+	const yAxisText = "Count";
+	
+	const satmData = d3.map(data,  v => v.SATM);
+	const satmAverage = d3.sum(satmData) / satmData.length;
+	
+	const satvData = d3.map(data,  v => v.SATV);
+	const satvAverage = d3.sum(satvData) / satvData.length;
+	
+	const actData = d3.map(data,  v => v.ACT);
+	const actAverage = d3.sum(actData) / actData.length;
+	
+	const gpaData = d3.map(data,  v => v.GPA);
+	const gpaAverage = d3.sum(gpaData) / gpaData.length;
+	
+	const aboveAverageData = {
+		SATM: satmData.filter(v => v > satmAverage).length,
+		SATV: satvData.filter(v => v > satvAverage).length,
+		ACT: actData.filter(v => v > actAverage).length,
+		GPA: gpaData.filter(v => v > gpaAverage).length,
+		type: "Above Average"
+	};
+	
+	const belowAverageData = {
+		SATM: satmData.filter(v => v < satmAverage).length,
+		SATV: satvData.filter(v => v < satvAverage).length,
+		ACT: actData.filter(v => v < actAverage).length,
+		GPA: gpaData.filter(v => v < gpaAverage).length,
+		type: "Below Average"
+	};
+	
+	const formattedData = [belowAverageData, aboveAverageData];
+	
+	const groups = formattedData.map(d => d.type);
+	
+	const subGroups = d3.keys(formattedData[0]);
+	subGroups.pop();
+	
+	const margin = {top: 30, bottom: 60, left: 30, right: 30};
+	const viewPortWidth = $(svg_id).width() 
+	const viewPortHeight = $(svg_id).height()
+	
+	const width = viewPortWidth - (margin.left + margin.right);
+	const height = viewPortHeight - (margin.top + margin.bottom);
+	
+	const canvas = d3.select(svg_id)
+	.append("svg")
+	.attr("x", 0)
+	.attr("y", 0)
+	.attr("width", viewPortWidth)
+	.attr("height", viewPortHeight);
+	
+	const xBandScale = d3.scaleBand()
+	.domain(groups)
+	.range([margin.left, width + margin.left])
+	.padding(0.6);
+	
+	const xScale = d3.scaleBand()
+	.domain(subGroups)
+	.range([0, xBandScale.bandwidth()])
+	.padding(0.05);
+	
+	var color = d3.scaleOrdinal()
+	.domain(subGroups)
+	.range(['#98a65d','#6771dc','#ea7f68','#de425b']);
+	
+	const yMin = 0;
+	const yMax = Math.max(d3.max(d3.map(formattedData, d => d.SATM)), 
+		d3.max(d3.map(formattedData, d => d.SATV)), 
+		d3.max(d3.map(formattedData, d => d.ACT)), 
+		d3.max(d3.map(formattedData, d => d.GPA))) + 10;
+	
+	//console.log(yMax);
+	
+	const yScale = d3.scaleLinear()
+	.domain([yMin, yMax])
+	.range([height + margin.top, margin.top])
+	.nice();
+	
+	canvas.append("g")
+	.selectAll("g")
+	.data(formattedData)
+	.join("g")
+	.attr("transform", function(d){
+		//console.log(xBandScale(d.type));  
+		return "translate("+ xBandScale(d.type) +", 0)";
+	})
+	.selectAll("rect")
+	.data(function(d){
+		return subGroups.map(function(key){
+			return {
+				key: key,
+				value: d[key]
+			};
+		});
+	})
+	.join("rect")
+	.attr("class", "group_bar_rectangle")
+	.on("mouseover", onMouseOver)
+	.on("mouseout", onMouseOut)
+	.attr("x", d => xScale(d.key))
+	.attr("y", d => yScale(d.value))
+	.attr("width", xScale.bandwidth())
+	.attr("height", d => yScale(yMin) - yScale(d.value))
+	.attr("fill", d => color(d.key))
+	.append("svg:title")
+	.text(d => "Count: " + d.value);
+	
+	function onMouseOver(d, i) {
+		const heightIncrease = 20;
+		const widthIncrease = 4;
+		
+		d3.selectAll(".group_bar_rectangle")
+		.attr("class", "group_bar_rectangle_non_highlight");
+		
+		d3.select(this)
+		.attr("class", "group_bar_rectangle")
+		.transition()
+		.duration(500)
+		.attr("x", d => xScale(d.key) - (widthIncrease / 2))
+		.attr("y", d => yScale(d.value) - heightIncrease)
+		.attr("width", xScale.bandwidth() + widthIncrease)
+		.attr("height", d => yScale(yMin) - yScale(d.value) + heightIncrease);
+	}
+	
+	function onMouseOut(d, i) {
+		d3.selectAll(".group_bar_rectangle_non_highlight")
+		.attr("class", "group_bar_rectangle");
+		
+		d3.select(this)
+		.transition()
+		.duration(500)
+		.attr("x", d => xScale(d.key))
+		.attr("y", d => yScale(d.value))
+		.attr("width", xScale.bandwidth())
+		.attr("height", d => yScale(yMin) - yScale(d.value));
+	}
+	
+	const xAxis = d3.axisBottom()
+	.scale(xBandScale);
+	
+	const yAxis = d3.axisLeft().scale(yScale);
+	
+	canvas.append("g")
+	.attr("transform", "translate(0, "+ (height + margin.top) +")")
+	.call(xAxis)
+	.attr("font-size", "12px");
+	
+	canvas.append("g")
+	.attr("transform", "translate("+ margin.left +", 0)")
+	.call(yAxis)
+	.attr("font-size", "12px")
+	.append("text")
+	.text(yAxisText)
+	.attr("transform", "rotate(-90)")
+	.attr("dx", -25)
+	.attr("dy", 20)
+	.style('fill', 'black')
+	.style("font-size", "12px")
+	.style("font-family", "sans-serif")
+	.style("text-anchor", "end");
+	
+	// Legend
+	const groupOriginX = 850
+	const groupOriginY = 29
+	
+	const group = canvas.append("g")
+	.attr("class","legend-group");
+	
+	const legend = group.selectAll(".legend")
+	.data(color.domain().slice().reverse())
+	.enter().append("g")
+	.attr("class","legend")
+	.attr("transform",function(d,i) { 
+		return "translate(0," + i * 20 + ")"; 
+	});
+	
+	legend.append("rect")
+	.attr("x",groupOriginX - 12)
+	.attr("y",groupOriginY + 6)
+	.attr("width",18)
+	.attr("height",18)
+	.style("fill", color);
+	
+	legend.append("text")
+	.attr("x",groupOriginX - 28)
+	.attr("y",groupOriginY + 14)
+	.attr("dy",".35em")
+	.style("text-anchor","end")
+	.text(function(d) {
+		const string = d.replace('_',' '); 
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	});
 }
