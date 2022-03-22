@@ -92,6 +92,32 @@ On mouse hover the exact number is shown.		</p>
     </div>
 
     <h3>Visualization 2: Scatter Plot</h3>
+	<label for="min_age_count">Choose minimum age:</label>
+	<select name="min_age_count" id="min_age_count" onchange="scatterPlotAgeListener();">
+	<option value="0" selected >0</option>
+	<option value="10">10</option>
+	<option value="20">20</option>
+	<option value="30">30</option>
+	<option value="40">40</option>
+	<option value="50">50</option>
+	<option value="60">60</option>
+	<option value="70">70</option>
+	<option value="80">80</option>
+	<option value="90">90</option>
+	</select>
+	<label for="max_age_count">Choose maximum age:</label>
+	<select name="max_age_count" id="max_age_count" onchange="scatterPlotAgeListener();">
+	<option value="0">0</option>
+	<option value="10">10</option>
+	<option value="20">20</option>
+	<option value="30" selected>30</option>
+	<option value="40">40</option>
+	<option value="50">50</option>
+	<option value="60">60</option>
+	<option value="70">70</option>
+	<option value="80">80</option>
+	<option value="90">90</option>
+	</select>
     <div><svg id="vis_2" name="vis_2" class="default_svg"></svg></div>
     <div>
         <p>This scatterplot plots the people over 30 years of age. Primarily there are two colors based on the survival status of the
@@ -136,11 +162,17 @@ On mouse hover the exact number is shown.		</p>
 		plot_barChart("#vis_1", titanic_data, d == "surviver_count");
 	}
 	
+	function scatterPlotAgeListener(){
+		const min_age = parseInt(d3.select("#min_age_count").node().value); 
+		const max_age = parseInt(d3.select("#max_age_count").node().value);
+		plot_scatterplot("#vis_2", titanic_data, parseInt(d3.select("#min_age_count").node().value), parseInt(d3.select("#max_age_count").node().value));
+	}
+	
 	$(document).ready(function(){
 		plot_barChart("#vis_1", titanic_data, true);
 		plot_groupedBarChart("#vis_3", titanic_data);
 		plot_pieChart("#vis_4", titanic_data);
-		plot_scatterplot("#vis_2", titanic_data);
+		plot_scatterplot("#vis_2", titanic_data, parseInt(d3.select("#min_age_count").node().value), parseInt(d3.select("#max_age_count").node().value));
 		
 	});
 </script>

@@ -1,27 +1,28 @@
-function plot_scatterplot(svg_id, data){
+function plot_scatterplot(svg_id, data, minCutOffRange, maxCutOffRange){
 	data.then(data => {
-		const baseAge = 30;
-		const formattedData = data.filter(d => d.age >= baseAge && d.embarked !== "");
+	    if(minCutOffRange>maxCutOffRange){
+			maxCutOffRange = maxCutOffRange + minCutOffRange;
+			minCutOffRange = maxCutOffRange - minCutOffRange;
+			maxCutOffRange = maxCutOffRange - minCutOffRange;
+		}
+		const formattedData = data.filter(d => (d.age >= minCutOffRange && d.age <= maxCutOffRange)  && d.embarked !== "");
 		
-		const margin = {top: 60, bottom: 60, left: 60, right: 30};
+		const margin = {top: 110, bottom: 60, left: 60, right: 30};
 		const viewPortWidth = $(svg_id).width() 
 		const viewPortHeight = $(svg_id).height()
 		
 		const width = viewPortWidth - (margin.left + margin.right);
 		const height = viewPortHeight - (margin.top + margin.bottom);
-
-		const canvas = d3.select(svg_id)
-		.append("svg")
-		.attr("x", 0)
-		.attr("y", 0)
-		.attr("width", viewPortWidth)
-		.attr("height", viewPortHeight);
+        
+		const canvas = d3.select(svg_id);
+		
+		canvas.selectAll("g").remove();
 		
 		const xScale = d3.scaleLinear()
 		.domain([0, formattedData.length - 1])
 		.range([margin.left, width + margin.left]);
 		
-		const yMin = baseAge;
+		const yMin = minCutOffRange;
 		const yMax = d3.max(formattedData.map(d => d.age));
 		
 		const yScale = d3.scaleLinear()
@@ -50,7 +51,7 @@ function plot_scatterplot(svg_id, data){
 		.domain(survivalDomain)
 		.range(["#e31a1c", "#1f78b4"]);
 		
-		const selections = canvas.selectAll("circle")
+		const selections = canvas.append("g").selectAll("circle")
 						.data(formattedData);
 						
 		selections.exit().remove();
@@ -101,7 +102,7 @@ function plot_scatterplot(svg_id, data){
 		.append("text")
 		.text("Passenger's Age")
 		.attr("transform", "rotate(-90)")
-		.attr("dx", -25)
+		.attr("dx", -95)
 		.attr("dy", -30)
 		.style('fill', 'black')
 		.style("font-size", "12px")

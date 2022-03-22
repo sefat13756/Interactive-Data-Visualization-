@@ -43,7 +43,7 @@ function plot_pieChart(svg_id, data){
 	.append("path");
 	
 	enterSelection.append("svg:title")
-	.text(function(d){return d.data.value;});
+	.text(function(d){return "No. of Students: " + d.data.value;});
 	
 	enterSelection.merge(selections)
 	.on("mouseover", onMouseOver)
